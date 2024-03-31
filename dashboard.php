@@ -72,8 +72,9 @@ $currentDate = date("Y-m-d");
 
     <!-- Optional additional content -->
     <div class="content">
-        <!-- Add more content here based on your requirements -->
+        
     </div>
+
 </div>
 </body>
 </html>
