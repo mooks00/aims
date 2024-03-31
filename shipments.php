@@ -1,7 +1,6 @@
 <?php
-require 'database.php'; // Include the database connection file
+require 'database.php'; 
 
-// Function to fetch all shipments from the database
 function getShipments() {
     global $conn;
     $sql = "SELECT shipments.shipment_id, shipments.order_id, shipments.shipment_date, shipments.tracking_num, shipments.delivery_status
@@ -17,7 +16,6 @@ function getShipments() {
     }
 }
 
-// Function to add a new shipment to the database
 function addShipment($orderId, $shipmentDate, $trackingNum, $deliveryStatus) {
     global $conn;
     $sql = "INSERT INTO shipments (order_id, shipment_date, tracking_num, delivery_status) VALUES ($orderId, '$shipmentDate', '$trackingNum', '$deliveryStatus')";
@@ -25,17 +23,14 @@ function addShipment($orderId, $shipmentDate, $trackingNum, $deliveryStatus) {
     return $conn->insert_id;
 }
 
-// Function to remove a shipment from the database
 function removeShipment($shipmentId) {
     global $conn;
     $sql = "DELETE FROM shipments WHERE shipment_id = $shipmentId";
     $conn->query($sql);
 }
 
-// Fetch all shipments from the database
 $shipments = getShipments();
 
-// Fetch orders for dropdown
 $orders = [];
 $sql = "SELECT order_id FROM orders";
 $result = $conn->query($sql);
@@ -43,7 +38,6 @@ if ($result->num_rows > 0) {
     $orders = $result->fetch_all(MYSQLI_ASSOC);
 }
 
-// Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['add_shipment'])) {
         $orderId = $_POST['order_id'];
@@ -52,13 +46,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $deliveryStatus = $_POST['delivery_status'];
 
         addShipment($orderId, $shipmentDate, $trackingNum, $deliveryStatus);
-        header('Location: shipments.php'); // Redirect after adding the shipment
+        header('Location: shipments.php'); 
         exit();
     } elseif (isset($_POST['remove_shipment'])) {
         $shipmentId = $_POST['shipment_id'];
 
         removeShipment($shipmentId);
-        header('Location: shipments.php'); // Redirect after removing the shipment
+        header('Location: shipments.php'); 
         exit();
     }
 }

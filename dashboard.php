@@ -6,7 +6,6 @@ if (!isset($_SESSION['username'])) {
     exit;
 }
 
-// Get current date
 date_default_timezone_set('Asia/Manila');
 $currentDate = date("Y-m-d");
 ?>
@@ -59,12 +58,6 @@ $currentDate = date("Y-m-d");
             </div>
         </div>
     </div>
-
-    <!-- Optional additional content -->
-    <div class="content">
-
-    </div>
-
 </div>
 </body>
 </html>

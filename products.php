@@ -1,7 +1,6 @@
 <?php
-require 'database.php'; // Include the database connection file
+require 'database.php'; 
 
-// Function to fetch all products from the database
 function getProducts() {
     global $conn;
     $sql = "SELECT * FROM product";
@@ -15,7 +14,6 @@ function getProducts() {
     }
 }
 
-// Function to add a new product to the database
 function addProduct($product_name, $description, $avail_qty, $unit_price) {
     global $conn;
     $sql = "INSERT INTO product (Product_name, Description, avail_Qty, Unit_price) VALUES ('$product_name', '$description', $avail_qty, $unit_price)";
@@ -23,14 +21,12 @@ function addProduct($product_name, $description, $avail_qty, $unit_price) {
     return $conn->insert_id;
 }
 
-// Function to remove a product from the database
 function removeProduct($product_id) {
     global $conn;
     $sql = "DELETE FROM product WHERE product_id = $product_id";
     $conn->query($sql);
 }
 
-// Handle form submissions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Check if the form is for adding a product
     if (isset($_POST['add_product'])) {
@@ -42,14 +38,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         addProduct($product_name, $description, $avail_qty, $unit_price);
     }
 
-    // Check if the form is for removing a product
     if (isset($_POST['remove_product'])) {
         $product_id = $_POST['product_id'];
         removeProduct($product_id);
     }
 }
 
-// Fetch all products from the database
 $products = getProducts();
 ?>
 

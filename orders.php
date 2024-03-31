@@ -1,7 +1,6 @@
 <?php
-require 'database.php'; // Include the database connection file
+require 'database.php'; 
 
-// Function to fetch all orders from the database
 function getOrders() {
     global $conn;
     $sql = "SELECT orders.order_id, orders.product_id, product.product_name, orders.order_qty, product.unit_price, orders.order_qty * product.unit_price AS order_price, orders.order_date
@@ -17,7 +16,6 @@ function getOrders() {
     }
 }
 
-// Function to add a new order to the database
 function addOrder($productId, $orderQty) {
     global $conn;
     
@@ -30,7 +28,6 @@ function addOrder($productId, $orderQty) {
         $unitPrice = $row['unit_price'];
         $orderPrice = $orderQty * $unitPrice;
 
-        // Insert the new order with the current date and time
         $sql = "INSERT INTO orders (product_id, order_qty, order_price, order_date) VALUES ($productId, $orderQty, $orderPrice, NOW())";
         $conn->query($sql);
 
@@ -40,23 +37,18 @@ function addOrder($productId, $orderQty) {
     }
 }
 
-// Function to remove an order from the database// Function to remove an order from the database
 function removeOrder($orderId) {
     global $conn;
     
-    // Delete related shipments first
     $sql = "DELETE FROM shipments WHERE order_id = $orderId";
     $conn->query($sql);
     
-    // Delete the order
     $sql = "DELETE FROM orders WHERE order_id = $orderId";
     $conn->query($sql);
 }
 
-// Fetch all orders from the database
 $orders = getOrders();
 
-// Fetch products for dropdown
 $products = [];
 $sql = "SELECT * FROM product";
 $result = $conn->query($sql);
@@ -64,12 +56,10 @@ if ($result->num_rows > 0) {
     $products = $result->fetch_all(MYSQLI_ASSOC);
 }
 
-// Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $productId = $_POST['product_id'];
     $orderQty = $_POST['order_qty'];
 
-    // Add order to the database
     $orderId = addOrder($productId, $orderQty);
 
     if ($orderId) {
@@ -79,11 +69,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Handle order removal
 if (isset($_GET['remove_order'])) {
     $orderId = $_GET['remove_order'];
 
-    // Remove order from the database
     removeOrder($orderId);
 }
 ?>

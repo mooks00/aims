@@ -1,7 +1,6 @@
 <?php
-require 'database.php'; // Include the database connection file
+require 'database.php'; 
 
-// Function to fetch sales from the sales table
 function getSales() {
     global $conn;
     $sql = "SELECT sales_id, order_date, total_amount FROM sales";
@@ -15,40 +14,34 @@ function getSales() {
     }
 }
 
-// Function to add a new sale to the sales table
 function addSale($orderDate) {
     global $conn;
 
-    // Fetch the total_amount from the orders table based on the order_date
     $sql = "SELECT SUM(order_price) AS total_amount FROM orders WHERE order_date = '$orderDate'";
     $result = $conn->query($sql);
     $row = $result->fetch_assoc();
     $totalAmount = $row['total_amount'];
 
-    // Insert the order_date and total_amount into the sales table
     $sql = "INSERT INTO sales (order_date, total_amount) VALUES ('$orderDate', '$totalAmount')";
     $conn->query($sql);
     return $conn->insert_id;
 }
 
-// Function to remove a sale from the sales table
 function removeSale($saleId) {
     global $conn;
-    $saleId = $conn->real_escape_string($saleId); // Escape the input to prevent SQL injection
+    $saleId = $conn->real_escape_string($saleId); 
     $sql = "DELETE FROM sales WHERE sales_id = '$saleId'";
     $conn->query($sql);
 }
 
-// Handle form submissions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Check if the form is for adding a sale
+   
     if (isset($_POST['add_sale'])) {
         $orderDate = $_POST['order_date'];
 
         addSale($orderDate);
     }
 
-    // Check if the form is for removing a sale
     if (isset($_POST['remove_sale'])) {
         if (isset($_POST['sale_id'])) {
             $saleId = $_POST['sale_id'];
@@ -57,7 +50,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Fetch all sales from the sales table
 $sales = getSales();
 ?>
 
@@ -122,7 +114,6 @@ $sales = getSales();
                 <li class="list-group-item">
                     <strong>Order Date:</strong> <?php echo $sale['order_date']; ?><br>
                     <?php
-                        // Fetch the total_amount from the orders table based on the order_date
                         $orderDate = $sale['order_date'];
                         $sql = "SELECT SUM(order_price) AS total_amount FROM orders WHERE order_date = '$orderDate'";
                         $result = $conn->query($sql);
