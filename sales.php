@@ -16,9 +16,9 @@ function getSales() {
 }
 
 // Function to add a new sale to the database
-function addSale($orderDate, $totalAmount, $status) {
+function addSale($orderDate, $totalAmount) {
     global $conn;
-    $sql = "INSERT INTO sales (Order_date, Total_amount, Status) VALUES ('$orderDate', $totalAmount, '$status')";
+    $sql = "INSERT INTO sales (Order_date, Total_amount) VALUES ('$orderDate', $totalAmount)";
     $conn->query($sql);
     return $conn->insert_id;
 }
@@ -36,9 +36,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['add_sale'])) {
         $orderDate = $_POST['order_date'];
         $totalAmount = $_POST['total_amount'];
-        $status = $_POST['status'];
 
-        addSale($orderDate, $totalAmount, $status);
+        addSale($orderDate, $totalAmount);
     }
 
     // Check if the form is for removing a sale
@@ -56,7 +55,7 @@ $sales = getSales();
 <html>
 <head>
     <title>Sales</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <?php include 'include/styles.html'; ?>
 </head>
 <body>
 
@@ -108,16 +107,7 @@ $sales = getSales();
                         <input type="number" class="form-control" id="total_amount" name="total_amount" step="0.01" required>
                     </div>
 
-                    <div class="form-group">
-                        <label for="status">Status:</label>
-                        <select class="form-control" id="status" name="status" required>
-                            <option value="pending">Pending</option>
-                            <option value="approved">Approved</option>
-                            <option value="shipped">Shipped</option>
-                        </select>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary" name="add_sale">Add Sale</button>
+                    <button type="submit" class="btn btn-primary" name="add_sale" style="margin-top:20px; background-color:#006A4E">Add Sale</button>
                 </form>
             </div>
 
@@ -127,10 +117,10 @@ $sales = getSales();
                     <ul class="list-group">
                         <?php foreach ($sales as $sale): ?>
                             <li class="list-group-item">
-                                <?php echo $sale['Order_date']; ?> - $<?php echo $sale['Total_amount']; ?> - <?php echo $sale['Status']; ?>
-                                <form method="POST" style="display: inline;">
+                                <?php echo $sale['Order_date']; ?> - $<?php echo $sale['Total_amount']; ?>
+                                <formmethod="POST" style="display:inline">
                                     <input type="hidden" name="sale_id" value="<?php echo $sale['sales_id']; ?>">
-                                    <button type="submit" class="btn btn-danger btn-sm" name="remove_sale">Remove</button>
+                                    <button type="submit" class="btn btn-danger btn-sm" name="remove_sale" style="float:right; margin-top:10px">Remove</button>
                                 </form>
                             </li>
                         <?php endforeach; ?>

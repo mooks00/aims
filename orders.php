@@ -4,9 +4,8 @@ require 'database.php'; // Include the database connection file
 // Function to fetch all orders from the database
 function getOrders() {
     global $conn;
-    $sql = "SELECT orders.order_id, orders.sales_id, sales.Order_date, orders.product_id, product.product_name, orders.order_qty, orders.order_price
+    $sql = "SELECT orders.order_id, orders.product_id, product.product_name, orders.order_qty, product.unit_price, orders.order_qty * product.unit_price AS order_price
             FROM orders
-            INNER JOIN sales ON orders.sales_id = sales.sales_id
             INNER JOIN product ON orders.product_id = product.product_id";
     $result = $conn->query($sql);
 
@@ -19,11 +18,22 @@ function getOrders() {
 }
 
 // Function to add a new order to the database
-function addOrder($salesId, $productId, $orderQty, $orderPrice) {
+function addOrder($productId, $orderQty) {
     global $conn;
-    $sql = "INSERT INTO orders (sales_id, product_id, order_qty, order_price) VALUES ($salesId, $productId, $orderQty, $orderPrice)";
-    $conn->query($sql);
-    return $conn->insert_id;
+    $sql = "SELECT unit_price FROM product WHERE product_id = $productId";
+    $result = $conn->query($sql);
+
+    if ($result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+        $unitPrice = $row['unit_price'];
+        $orderPrice = $orderQty * $unitPrice;
+
+        $sql = "INSERT INTO orders (product_id, order_qty, order_price) VALUES ($productId, $orderQty, $orderPrice)";
+        $conn->query($sql);
+        return $conn->insert_id;
+    } else {
+        return false;
+    }
 }
 
 // Function to remove an order from the database
@@ -36,14 +46,6 @@ function removeOrder($orderId) {
 // Fetch all orders from the database
 $orders = getOrders();
 
-// Fetch sales for dropdown
-$sales = [];
-$sql = "SELECT * FROM sales";
-$result = $conn->query($sql);
-if ($result->num_rows > 0) {
-    $sales = $result->fetch_all(MYSQLI_ASSOC);
-}
-
 // Fetch products for dropdown
 $products = [];
 $sql = "SELECT * FROM product";
@@ -52,13 +54,36 @@ if ($result->num_rows > 0) {
     $products = $result->fetch_all(MYSQLI_ASSOC);
 }
 
+// Handle form submission
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $productId = $_POST['product_id'];
+    $orderQty = $_POST['order_qty'];
+
+    // Add order to the database
+    $orderId = addOrder($productId, $orderQty);
+
+    if ($orderId) {
+        echo "Order added successfully!";
+    } else {
+        echo "Failed to add order.";
+    }
+}
+
+// Handle order removal
+if (isset($_GET['remove_order'])) {
+    $orderId = $_GET['remove_order'];
+
+    // Remove order from the database
+    removeOrder($orderId);
+}
+
 ?>
 
 <!DOCTYPE html>
 <html>
 <head>
     <title>Orders</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <?php include 'include/styles.html'; ?>
 </head>
 <body>
 
@@ -92,7 +117,7 @@ if ($result->num_rows > 0) {
             </ul>
         </div>
     </nav>
-    
+
     <div class="container">
         <h1>Orders</h1>
 
@@ -100,15 +125,6 @@ if ($result->num_rows > 0) {
             <div class="col-md-6">
                 <h2>Add Order</h2>
                 <form method="POST">
-                    <div class="form-group">
-                        <label for="sales_id">Sales:</label>
-                        <select class="form-control" id="sales_id" name="sales_id" required>
-                            <?php foreach ($sales as $sale): ?>
-                                <option value="<?php echo $sale['sales_id']; ?>"><?php echo $sale['sales_id']; ?> - <?php echo $sale['Order_date']; ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-
                     <div class="form-group">
                         <label for="product_id">Product:</label>
                         <select class="form-control" id="product_id" name="product_id" required>
@@ -119,32 +135,46 @@ if ($result->num_rows > 0) {
                     </div>
 
                     <div class="form-group">
-                        <label for="order_qty">Order Quantity:</label>
+                        <label for="order_qty">Quantity:</label>
                         <input type="number" class="form-control" id="order_qty" name="order_qty" required>
                     </div>
 
                     <div class="form-group">
-                        <label for="order_price">Order Price:</label>
-                        <input type="number" class="form-control" id="order_price" name="order_price" step="0.01" required>
+                        <label for="order_price">Price:</label>
+                        <input type="number" step="0.01" class="form-control" id="order_price" name="order_price" required>
                     </div>
 
-                    <button type="submit" class="btn btn-primary" name="add_order">Add Order</button>
+                    <button type="submit" class="btn btn-primary" style="margin-top:20px; background-color:#006A4E">Add Order</button>
                 </form>
             </div>
-
             <div class="col-md-6">
                 <h2>Order List</h2>
-                <?php if (count($orders) > 0): ?>
-                    <ul class="list-group">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Product ID</th>
+                            <th>Product Name</th>
+                            <th>Quantity</th>
+                            <th>Price</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
                         <?php foreach ($orders as $order): ?>
-                            <li class="list-group-item">
-                                Order ID: <?php echo $order['order_id']; ?> - Sales ID: <?php echo $order['sales_id']; ?> - Order Date: <?php echo $order['Order_date']; ?> - Product ID: <?php echo $order['product_id']; ?> - Product Name: <?php echo $order['product_name']; ?> - Quantity: <?php echo $order['order_qty']; ?> - Price: $<?php echo $order['order_price']; ?>
-                            </li>
+                            <tr>
+                                <td><?php echo $order['order_id']; ?></td>
+                                <td><?php echo $order['product_id']; ?></td>
+                                <td><?php echo $order['product_name']; ?></td>
+                                <td><?php echo $order['order_qty']; ?></td>
+                                <td><?php echo $order['order_price']; ?></td>
+                                <td>
+                                    <a href="orders.php?remove_order=<?php echo $order['order_id']; ?>" class="btn btn-danger btn-sm" style="margin-top:10px">Remove</a>
+                                </td>
+                            </tr>
                         <?php endforeach; ?>
-                    </ul>
-                <?php else: ?>
-                    <p>No orders found.</p>
-                <?php endif; ?>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>

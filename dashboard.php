@@ -15,8 +15,7 @@ $currentDate = date("Y-m-d");
 <html>
 <head>
     <title>Dashboard</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="styles.css">
+    <?php include 'include/styles.html'; ?>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-white" style=" box-shadow: 0 2px 4px 0 rgba(0,0,0,.2)">
@@ -49,10 +48,6 @@ $currentDate = date("Y-m-d");
             </ul>
         </div>
     </nav>
-
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
     <div style="background-color:#006A4E">
     <div class="container d-flex justify-content-center align-items-center" style="height: 500px">

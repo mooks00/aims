@@ -57,7 +57,7 @@ $products = getProducts();
 <html>
 <head>
     <title>Products</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <?php include 'include/styles.html'; ?>
 </head>
 <body>
 
@@ -119,28 +119,31 @@ $products = getProducts();
                         <input type="number" class="form-control" id="unit_price" name="unit_price" step="0.01" required>
                     </div>
 
-                    <button type="submit" class="btn btn-primary" name="add_product">Add Product</button>
+                    <button type="submit" class="btn btn-primary" name="add_product" style="margin-top:20px; background-color:#006A4E">Add Product</button>
                 </form>
             </div>
 
             <div class="col-md-6">
-                <h2>Product List</h2>
-                <?php if (count($products) > 0): ?>
-                    <ul class="list-group">
-                        <?php foreach ($products as $product): ?>
-                            <li class="list-group-item">
-                                <?php echo $product['Product_name']; ?>
-                                <form method="POST" style="display: inline;">
-                                    <input type="hidden" name="product_id" value="<?php echo $product['product_id']; ?>">
-                                    <button type="submit" class="btn btn-danger btn-sm" name="remove_product">Remove</button>
-                                </form>
-                            </li>
-                        <?php endforeach; ?>
-                    </ul>
-                <?php else: ?>
-                    <p>No products found.</p>
-                <?php endif; ?>
-            </div>
+    <h2>Product List</h2>
+    <?php if (count($products) > 0): ?>
+        <ul class="list-group">
+            <?php foreach ($products as $product): ?>
+                <li class="list-group-item">
+                    <strong><?php echo $product['product_name']; ?></strong><br>
+                    Quantity: <?php echo $product['avail_qty']; ?><br>
+                    Price: <?php echo $product['unit_price']; ?><br>
+                    Description: <?php echo $product['description']; ?><br>
+                    <form method="POST" style="display: inline;">
+                        <input type="hidden" name="product_id" value="<?php echo $product['product_id']; ?>">
+                        <button type="submit" class="btn btn-danger btn-sm" name="remove_product" style="margin-top:10px">Remove</button>
+                    </form>
+                </li>
+            <?php endforeach; ?>
+        </ul>
+    <?php else: ?>
+        <p>No products found.</p>
+    <?php endif; ?>
+</div>
         </div>
     </div>
 </body>

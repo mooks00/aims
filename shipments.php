@@ -68,7 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html>
 <head>
     <title>Shipments</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <?php include 'include/styles.html'; ?>
 </head>
 <body>
 
@@ -113,7 +113,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <label for="order_id">Order:</label>
                         <select class="form-control" id="order_id" name="order_id" required>
                             <?php foreach ($orders as $order): ?>
-                                <option value="<?php echo $order['order_id']; ?>"><?php echo $order['order_reference']; ?></option>
+                                <option value="<?php echo $order['order_id']; ?>"><?php echo $order['order_id']; ?></option>
                             <?php endforeach; ?>
                         </select>
                     </div>
@@ -138,7 +138,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </select>
                     </div>
 
-                    <button type="submit" class="btn btn-primary" name="add_shipment">Add Shipment</button>
+                    <button type="submit" class="btn btn-primary" name="add_shipment" style="margin-top:20px; background-color:#006A4E">Add Shipment </button>
                 </form>
             </div>
 
@@ -167,7 +167,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <td>
                                     <form method="POST" onsubmit="return confirm('Are you sure you want to remove this shipment?');">
                                         <input type="hidden" name="shipment_id" value="<?php echo $shipment['shipment_id']; ?>">
-                                        <button type="submit" class="btn btn-danger" name="remove_shipment">Remove</button>
+                                        <button type="submit" class="btn btn-danger" name="remove_shipment" style="margin-top:10px">Remove</button>
                                     </form>
                                 </td>
                             </tr>
