@@ -4,7 +4,7 @@ require 'database.php'; // Include the database connection file
 // Function to fetch all orders from the database
 function getOrders() {
     global $conn;
-    $sql = "SELECT orders.order_id, orders.product_id, product.product_name, orders.order_qty, product.unit_price, orders.order_qty * product.unit_price AS order_price
+    $sql = "SELECT orders.order_id, orders.product_id, product.product_name, orders.order_qty, product.unit_price, orders.order_qty * product.unit_price AS order_price, orders.order_date
             FROM orders
             INNER JOIN product ON orders.product_id = product.product_id";
     $result = $conn->query($sql);
@@ -20,6 +20,8 @@ function getOrders() {
 // Function to add a new order to the database
 function addOrder($productId, $orderQty) {
     global $conn;
+    
+    // Fetch the unit price of the product
     $sql = "SELECT unit_price FROM product WHERE product_id = $productId";
     $result = $conn->query($sql);
 
@@ -28,17 +30,25 @@ function addOrder($productId, $orderQty) {
         $unitPrice = $row['unit_price'];
         $orderPrice = $orderQty * $unitPrice;
 
-        $sql = "INSERT INTO orders (product_id, order_qty, order_price) VALUES ($productId, $orderQty, $orderPrice)";
+        // Insert the new order with the current date and time
+        $sql = "INSERT INTO orders (product_id, order_qty, order_price, order_date) VALUES ($productId, $orderQty, $orderPrice, NOW())";
         $conn->query($sql);
+
         return $conn->insert_id;
     } else {
         return false;
     }
 }
 
-// Function to remove an order from the database
+// Function to remove an order from the database// Function to remove an order from the database
 function removeOrder($orderId) {
     global $conn;
+    
+    // Delete related shipments first
+    $sql = "DELETE FROM shipments WHERE order_id = $orderId";
+    $conn->query($sql);
+    
+    // Delete the order
     $sql = "DELETE FROM orders WHERE order_id = $orderId";
     $conn->query($sql);
 }
@@ -63,9 +73,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $orderId = addOrder($productId, $orderQty);
 
     if ($orderId) {
-        echo "Order added successfully!";
+        $orderMessage = "Order added successfully!";
     } else {
-        echo "Failed to add order.";
+        $orderMessage = "Failed to add order.";
     }
 }
 
@@ -76,7 +86,6 @@ if (isset($_GET['remove_order'])) {
     // Remove order from the database
     removeOrder($orderId);
 }
-
 ?>
 
 <!DOCTYPE html>
@@ -86,7 +95,6 @@ if (isset($_GET['remove_order'])) {
     <?php include 'include/styles.html'; ?>
 </head>
 <body>
-
 <nav class="navbar navbar-expand-lg navbar-light bg-white" style=" box-shadow: 0 2px 4px 0 rgba(0,0,0,.2)">
     <a class="navbar-brand" href="dashboard.php">
     <img src="logo.png" class="logo" style="padding: 5px 8px"/>
@@ -127,56 +135,56 @@ if (isset($_GET['remove_order'])) {
                 <form method="POST">
                     <div class="form-group">
                         <label for="product_id">Product:</label>
-                        <select class="form-control" id="product_id" name="product_id" required>
+                        <select class="form-control"name="product_id" id="product_id" required>
+                            <option value="">Select a product..</option>
                             <?php foreach ($products as $product): ?>
-                                <option value="<?php echo $product['product_id']; ?>"><?php echo $product['product_id']; ?> - <?php echo $product['product_name']; ?></option>
+                                <option value="<?php echo $product['product_id']; ?>"><?php echo $product['product_name']; ?></option>
                             <?php endforeach; ?>
                         </select>
                     </div>
-
                     <div class="form-group">
                         <label for="order_qty">Quantity:</label>
-                        <input type="number" class="form-control" id="order_qty" name="order_qty" required>
+                        <input type="number" class="form-control" name="order_qty" id="order_qty" placeholder="Enter quantity.." required>
                     </div>
-
-                    <div class="form-group">
-                        <label for="order_price">Price:</label>
-                        <input type="number" step="0.01" class="form-control" id="order_price" name="order_price" required>
-                    </div>
-
                     <button type="submit" class="btn btn-primary" style="margin-top:20px; background-color:#006A4E">Add Order</button>
                 </form>
-            </div>
-            <div class="col-md-6">
-                <h2>Order List</h2>
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Order ID</th>
-                            <th>Product ID</th>
-                            <th>Product Name</th>
-                            <th>Quantity</th>
-                            <th>Price</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($orders as $order): ?>
-                            <tr>
-                                <td><?php echo $order['order_id']; ?></td>
-                                <td><?php echo $order['product_id']; ?></td>
-                                <td><?php echo $order['product_name']; ?></td>
-                                <td><?php echo $order['order_qty']; ?></td>
-                                <td><?php echo $order['order_price']; ?></td>
-                                <td>
-                                    <a href="orders.php?remove_order=<?php echo $order['order_id']; ?>" class="btn btn-danger btn-sm" style="margin-top:10px">Remove</a>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
+                <?php if (isset($orderMessage)): ?>
+                    <p class="text-success"><?php echo $orderMessage; ?></p>
+                <?php endif; ?>
             </div>
         </div>
+
+        <h2>Order List</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th>Product ID</th>
+                    <th>Product Name</th>
+                    <th>Quantity</th>
+                    <th>Unit Price</th>
+                    <th>Total Price</th>
+                    <th>Order Date</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($orders as $order): ?>
+                    <tr>
+                        <td><?php echo $order['order_id']; ?></td>
+                        <td><?php echo $order['product_id']; ?></td>
+                        <td><?php echo $order['product_name']; ?></td>
+                        <td><?php echo $order['order_qty']; ?></td>
+                        <td><?php echo $order['unit_price']; ?></td>
+                        <td><?php echo $order['order_price']; ?></td>
+                        <td><?php echo $order['order_date']; ?></td>
+                        <td>
+                            <a href="?remove_order=<?php echo $order['order_id']; ?>" class="btn btn-danger btn-sm">Remove</a>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
     </div>
 </body>
 </html>

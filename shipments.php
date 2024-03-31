@@ -131,10 +131,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="form-group">
                         <label for="delivery_status">Delivery Status:</label>
                         <select class="form-control" id="delivery_status" name="delivery_status" required>
-                            <option value="to pack">To Pack</option>
-                            <option value="packed">Packed</option>
-                            <option value="in transit">In Transit</option>
-                            <option value="delivered">Delivered</option>
+                            <option value="To pack">To Pack</option>
+                            <option value="Packed">Packed</option>
+                            <option value="In transit">In Transit</option>
+                            <option value="Delivered">Delivered</option>
                         </select>
                     </div>
 
