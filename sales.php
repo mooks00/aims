@@ -1,62 +1,61 @@
 <?php
 require 'database.php'; // Include the database connection file
 
-// Function to fetch all products from the database
-function getProducts() {
+// Function to fetch all sales from the database
+function getSales() {
     global $conn;
-    $sql = "SELECT * FROM product";
+    $sql = "SELECT * FROM sales";
     $result = $conn->query($sql);
 
     if ($result->num_rows > 0) {
-        $products = $result->fetch_all(MYSQLI_ASSOC);
-        return $products;
+        $sales = $result->fetch_all(MYSQLI_ASSOC);
+        return $sales;
     } else {
         return [];
     }
 }
 
-// Function to add a new product to the database
-function addProduct($product_name, $description, $avail_qty, $unit_price) {
+// Function to add a new sale to the database
+function addSale($orderDate, $totalAmount, $status) {
     global $conn;
-    $sql = "INSERT INTO product (Product_name, Description, avail_Qty, Unit_price) VALUES ('$product_name', '$description', $avail_qty, $unit_price)";
+    $sql = "INSERT INTO sales (Order_date, Total_amount, Status) VALUES ('$orderDate', $totalAmount, '$status')";
     $conn->query($sql);
     return $conn->insert_id;
 }
 
-// Function to remove a product from the database
-function removeProduct($product_id) {
+// Function to remove a sale from the database
+function removeSale($saleId) {
     global $conn;
-    $sql = "DELETE FROM product WHERE product_id = $product_id";
+    $sql = "DELETE FROM sales WHERE sales_id = $saleId";
     $conn->query($sql);
 }
 
 // Handle form submissions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Check if the form is for adding a product
-    if (isset($_POST['add_product'])) {
-        $product_name = $_POST['product_name'];
-        $description = $_POST['description'];
-        $avail_qty = $_POST['avail_qty'];
-        $unit_price = $_POST['unit_price'];
+    // Check if the form is for adding a sale
+    if (isset($_POST['add_sale'])) {
+        $orderDate = $_POST['order_date'];
+        $totalAmount = $_POST['total_amount'];
+        $status = $_POST['status'];
 
-        addProduct($product_name, $description, $avail_qty, $unit_price);
+        addSale($orderDate, $totalAmount, $status);
     }
 
-    // Check if the form is for removing a product
-    if (isset($_POST['remove_product'])) {
-        $product_id = $_POST['product_id'];
-        removeProduct($product_id);
+    // Check if the form is for removing a sale
+    if (isset($_POST['remove_sale'])) {
+        $saleId = $_POST['sale_id'];
+        removeSale($saleId);
     }
 }
 
-// Fetch all products from the database
-$products = getProducts();
+// Fetch all sales from the database
+$sales = getSales();
 ?>
 
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Products</title>
+    <title>Sales</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
@@ -93,52 +92,51 @@ $products = getProducts();
     </nav>
 
     <div class="container">
-        <h1>Products</h1>
+        <h1>Sales</h1>
 
         <div class="row">
             <div class="col-md-6">
-                <h2>Add Product</h2>
+                <h2>Add Sale</h2>
                 <form method="POST">
                     <div class="form-group">
-                        <label for="product_name">Product Name:</label>
-                        <input type="text" class="form-control" id="product_name" name="product_name" required>
+                        <label for="order_date">Order Date:</label>
+                        <input type="date" class="form-control" id="order_date" name="order_date" required>
                     </div>
 
                     <div class="form-group">
-                        <label for="description">Description:</label>
-                        <textarea class="form-control" id="description" name="description" required></textarea>
+                        <label for="total_amount">Total Amount:</label>
+                        <input type="number" class="form-control" id="total_amount" name="total_amount" step="0.01" required>
                     </div>
 
                     <div class="form-group">
-                        <label for="avail_qty">Available Quantity:</label>
-                        <input type="number" class="form-control" id="avail_qty" name="avail_qty" required>
+                        <label for="status">Status:</label>
+                        <select class="form-control" id="status" name="status" required>
+                            <option value="pending">Pending</option>
+                            <option value="approved">Approved</option>
+                            <option value="shipped">Shipped</option>
+                        </select>
                     </div>
 
-                    <div class="form-group">
-                        <label for="unit_price">Unit Price:</label>
-                        <input type="number" class="form-control" id="unit_price" name="unit_price" step="0.01" required>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary" name="add_product">Add Product</button>
+                    <button type="submit" class="btn btn-primary" name="add_sale">Add Sale</button>
                 </form>
             </div>
 
             <div class="col-md-6">
-                <h2>Product List</h2>
-                <?php if (count($products) > 0): ?>
+                <h2>Sale List</h2>
+                <?php if (count($sales) > 0): ?>
                     <ul class="list-group">
-                        <?php foreach ($products as $product): ?>
+                        <?php foreach ($sales as $sale): ?>
                             <li class="list-group-item">
-                                <?php echo $product['Product_name']; ?>
+                                <?php echo $sale['Order_date']; ?> - $<?php echo $sale['Total_amount']; ?> - <?php echo $sale['Status']; ?>
                                 <form method="POST" style="display: inline;">
-                                    <input type="hidden" name="product_id" value="<?php echo $product['product_id']; ?>">
-                                    <button type="submit" class="btn btn-danger btn-sm" name="remove_product">Remove</button>
+                                    <input type="hidden" name="sale_id" value="<?php echo $sale['sales_id']; ?>">
+                                    <button type="submit" class="btn btn-danger btn-sm" name="remove_sale">Remove</button>
                                 </form>
                             </li>
                         <?php endforeach; ?>
                     </ul>
                 <?php else: ?>
-                    <p>No products found.</p>
+                    <p>No sales found.</p>
                 <?php endif; ?>
             </div>
         </div>

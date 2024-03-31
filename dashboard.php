@@ -35,12 +35,6 @@ $currentDate = date("Y-m-d");
                     <a class="nav-link" href="products.php">Products</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="categories.php">Categories</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="vendor.php">Vendor</a>
-                </li>
-                <li class="nav-item">
                     <a class="nav-link" href="sales.php">Sales</a>
                 </li>
                 <li class="nav-item">
@@ -72,7 +66,7 @@ $currentDate = date("Y-m-d");
 
     <!-- Optional additional content -->
     <div class="content">
-        
+
     </div>
 
 </div>
